@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+const messageExchange = "messages"
 
 type messageRequest struct {
 	Sender   string `json:"sender" binding:"required"`
@@ -28,13 +33,13 @@ func main() {
 	defer ch.Close()
 
 	err = ch.ExchangeDeclare(
-		"logs",   // name
-		"fanout", // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
+		messageExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 
 	r := gin.Default()
@@ -48,7 +53,26 @@ func main() {
 			return
 		}
 
+		// marshal again with guaranteed success and only the fields we need
+		rabbitmqBody, err := json.Marshal(req)
+		if err != nil {
+			panic("failed to marshal request - this should never happen")
+		}
+
 		// forward message to RabbitMQ
+		ctx, cancel := context.WithTimeout(c, 5*time.Second)
+		defer cancel()
+
+		err = ch.PublishWithContext(
+			ctx,
+			messageExchange,
+			"",
+			false,
+			false,
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        rabbitmqBody,
+			})
 
 		c.JSON(http.StatusOK, gin.H{})
 	})
