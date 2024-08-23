@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,7 +17,14 @@ type message struct {
 	Message  string `json:"message"`
 }
 
+type redisKey struct {
+	s string `json:"s"`
+	r string `json:"r"`
+}
+
 func main() {
+	ctx := context.Background()
+
 	// setup redis connection
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -90,6 +99,26 @@ func main() {
 	go func() {
 		for d := range msgs {
 			log.Printf(" [x] %s", d.Body)
+
+			var messageBody message
+
+			err := json.Unmarshal(d.Body, &messageBody)
+			if err != nil {
+				log.Printf("Failed to unmarshal message: %v", err)
+				continue
+			}
+
+			// store message in Redis
+			key := redisKey{s: messageBody.Sender, r: messageBody.Receiver}
+			keyBytes, err := json.Marshal(key)
+			if err != nil {
+				panic("failed to marshal key - this should never happen")
+			}
+
+			err = rdb.LPush(ctx, string(keyBytes), messageBody.Message).Err()
+			if err != nil {
+				log.Printf("Failed to store message in Redis: %v", err)
+			}
 		}
 	}()
 
