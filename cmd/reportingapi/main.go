@@ -21,8 +21,8 @@ type messageResponse struct {
 }
 
 type redisKey struct {
-	s string `json:"s"`
-	r string `json:"r"`
+	S string `json:"s"`
+	R string `json:"r"`
 }
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 		}
 
 		// Create a key for the sender and receiver
-		key := redisKey{s: req.Sender, r: req.Receiver}
+		key := redisKey{S: req.Sender, R: req.Receiver}
 		keyBytes, err := json.Marshal(key)
 		if err != nil {
 			panic("failed to marshal key - this should never happen")

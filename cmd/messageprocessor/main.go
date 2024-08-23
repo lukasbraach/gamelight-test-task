@@ -18,8 +18,8 @@ type message struct {
 }
 
 type redisKey struct {
-	s string `json:"s"`
-	r string `json:"r"`
+	S string `json:"s"`
+	R string `json:"r"`
 }
 
 func main() {
@@ -108,7 +108,7 @@ func main() {
 			}
 
 			// store message in Redis
-			key := redisKey{s: messageBody.Sender, r: messageBody.Receiver}
+			key := redisKey{S: messageBody.Sender, R: messageBody.Receiver}
 			keyBytes, err := json.Marshal(key)
 			if err != nil {
 				panic("failed to marshal key - this should never happen")
@@ -118,6 +118,8 @@ func main() {
 			if err != nil {
 				log.Printf("Failed to store message in Redis: %v", err)
 			}
+
+			log.Printf(" [x] Stored message in Redis: %s => %s", string(keyBytes), messageBody.Message)
 		}
 	}()
 
