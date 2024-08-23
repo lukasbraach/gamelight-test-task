@@ -53,23 +53,24 @@ func main() {
 		}
 
 		// Get matching messages from Redis
-		values, err := rdb.LRange(ctx, string(keyBytes), -1, 0).Result()
+		values, err := rdb.LRange(ctx, string(keyBytes), 0, -1).Result()
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
 		// Convert messages to response format
-		list := make([]messageResponse, 0, len(values))
+		list := make([]messageResponse, len(values))
 
-		for _, v := range values {
-			m := messageResponse{
+		for i, v := range values {
+			// no time to overengineer stuff.
+			// If I had used a Redis stream, things would have been easier...
+			list[len(values)-i-1] = messageResponse{
 				Sender:   req.Sender,
 				Receiver: req.Receiver,
 				Message:  v,
 			}
 
-			list = append(list, m)
 		}
 
 		c.JSON(http.StatusOK, list)
