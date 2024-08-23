@@ -1,0 +1,32 @@
+version: '3.6'
+
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: cmd/api/Dockerfile
+
+    ports:
+      - "8080:8080"
+    network_mode: host
+
+  messageprocessor:
+    container_name: messageprocessor
+    network_mode: host
+    build:
+      context: .
+      dockerfile: cmd/messageprocessor/Dockerfile
+
+
+  reportingapi:
+    container_name: reportingapi
+    network_mode: host
+    environment:
+      - "PORT=8081"
+    build:
+      context: .
+      dockerfile: cmd/reportingapi/Dockerfile
+
+    ports:
+      - "8081:8081"
