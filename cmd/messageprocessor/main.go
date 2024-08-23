@@ -31,7 +31,6 @@ func main() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	_ = rdb // use rdb to avoid unused variable error
 
 	// setup RabbitMQ connection
 	conn, err := amqp.Dial("amqp://user:password@localhost:7001/")
