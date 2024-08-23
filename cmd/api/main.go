@@ -41,6 +41,9 @@ func main() {
 		false,
 		nil,
 	)
+	if err != nil {
+		log.Fatalf("Failed to declare RabbitMQ exchange: %v", err)
+	}
 
 	r := gin.Default()
 
