@@ -20,7 +20,7 @@ type messageRequest struct {
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://user:password@localhost:7001/")
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
@@ -47,7 +47,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/message", func(c *gin.Context) {
+	r.POST("/message", func(c *gin.Context) {
 		var req messageRequest
 
 		err := c.BindJSON(&req)

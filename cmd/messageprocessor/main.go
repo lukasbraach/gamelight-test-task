@@ -24,7 +24,8 @@ func main() {
 	})
 	_ = rdb // use rdb to avoid unused variable error
 
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	// setup RabbitMQ connection
+	conn, err := amqp.Dial("amqp://user:password@localhost:7001/")
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
